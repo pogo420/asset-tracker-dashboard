@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f6f7f9;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .muted {
+            color: #666;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Investment Dashboard</h1>
+
+        <div class="card">
+            <h2>Upcoming Maturities</h2>
+
+            <h3>Within 30 Days</h3>
+            {% for item in reminders.due_30_days %}
+                <p>
+                    <strong>{{ item.name }}</strong>
+                    — {{ item.asset_type }}
+                    — {{ item.maturity_date }}
+                    — ₹{{ "%.3f"|format(item.current_amount) }} L
+                </p>
+            {% else %}
+                <p class="muted">No investments maturing within 30 days.</p>
+            {% endfor %}
+
+            <h3>31–60 Days</h3>
+            {% for item in reminders.due_60_days %}
+                <p>
+                    <strong>{{ item.name }}</strong>
+                    — {{ item.asset_type }}
+                    — {{ item.maturity_date }}
+                    — ₹{{ "%.3f"|format(item.current_amount) }} L
+                </p>
+            {% else %}
+                <p class="muted">No investments maturing within 31–60 days.</p>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h2>Projection</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Portfolio</th>
+                        <th>Current</th>
+                        {% if projections %}
+                            {% for year in projections[0].projections.keys() %}
+                                <th>{{ year }}Y</th>
+                            {% endfor %}
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for projection in projections %}
+                        <tr>
+                            <td>{{ projection.name }}</td>
+                            <td>{{ "%.2f"|format(projection.current_value) }} L</td>
+
+                            {% for value in projection.projections.values() %}
+                                <td>{{ "%.2f"|format(value) }} L</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    <tr style="font-weight: bold; background-color: #f0f0f0;">
+                            <td>Total</td>
+                            {% for year, value in total_projections.items() %}
+                                <td>{{ "%.2f"|format(value) }} L</td>
+                            {% endfor %}
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Matured Investments</h2>
+            {% for item in reminders.matured %}
+                <p>
+                    <strong>{{ item.name }}</strong>
+                    — {{ item.asset_type }}
+                    — matured {{ item.maturity_date }}
+                </p>
+            {% else %}
+                <p class="muted">No matured investments pending review.</p>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h2>Need to create</h2>
+            {% for item in reminders.missing_id %}
+                <p>{{ item.asset_type }} — {{ item.name }}</p>
+            {% else %}
+                <p class="muted">No missing IDs.</p>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h2>Detailed View - RDs</h2>
+                {% for item in investments %}
+                    {% if item.asset_type == "RD" %}
+                        <p>
+                            ID: {{ item.id }} |
+                            Name: {{ item.name }} |
+                            Monthly: ₹{{ item.monthly_invest }} L
+                            Maturity: {{ item.maturity_date }}
+                        </p>
+                    {% endif %}
+                {% endfor %}
+        </div>
+
+        <div class="card">
+            <h2>Detailed View - FDs</h2>
+                {% for item in investments %}
+                    {% if item.asset_type == "FD" %}
+                        <p>
+                            ID: {{ item.id }} |
+                            Name: {{ item.name }} |
+                            Current Amount: ₹{{ "%.3f"|format(item.current_amount) }} L
+                            Maturity: {{ item.maturity_date }}
+                        </p>
+                    {% endif %}
+                {% endfor %}
+        </div>
+
+    </div>
+</body>
+</html>

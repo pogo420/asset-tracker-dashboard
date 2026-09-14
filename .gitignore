@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Data related
+data/
+
+# Reporting
+report/
+
+
+# Mac related
+.DS_Store
